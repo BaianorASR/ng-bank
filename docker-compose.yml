@@ -1,1 +1,53 @@
-services: "3.9"
+version: "3.9"
+services:
+  db:
+    container_name: db
+    image: postgres:14.4-alpine
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - ./:/betblex
+    environment:
+      POSTGRES_PASSWORD: baianor
+      POSTGRES_USER: baianor
+      POSTGRES_DB: ngbank
+    command: -p 5432
+
+  backend:
+    container_name: ng-backend
+    image: ng-backend
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+      target: dev
+    volumes:
+      - ./backend:/ngbank/app
+      - /ngbank/app/node_modules
+    ports:
+      - "3001:3001"
+    restart: always
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    command: yarn start:dev core
+
+  frontend:
+    container_name: ng-frontend
+    image: ng-frontend
+    build:
+      dockerfile: Dockerfile
+      context: ./frontend
+    volumes:
+      - ./frontend:/ngbank/app
+      - /ngbank/app/node_modules
+    ports:
+      - "3000:3000"
+    restart: always
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - db
+      - backend
+    command: yarn dev
