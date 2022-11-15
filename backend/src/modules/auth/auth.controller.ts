@@ -1,8 +1,9 @@
+import { CurrentUser } from '@decorators/current-user.decorator';
+import { Public } from '@decorators/public-auth.decorator';
 import { LocalAuthGuard } from '@guards/local-auth.guard';
+import { ICurrentUser } from '@interfaces/current-user.interface';
 import { UserCreateDto } from '@modules/users/dtos';
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -10,13 +11,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Public()
   async registerNewUser(@Body() userCreateDto: UserCreateDto) {
     return this.authService.registerNewUser(userCreateDto);
   }
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
+  @Public()
   @Post('login')
-  async login() {
-    return 'login';
+  async login(@CurrentUser() currentUser: ICurrentUser) {
+    return this.authService.login(currentUser);
   }
 }

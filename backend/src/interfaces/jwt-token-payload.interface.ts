@@ -1,4 +1,4 @@
-export interface JwtTokenPayload {
+export interface IJwtTokenPayload {
   username: string;
   sub: number;
   iat: number;

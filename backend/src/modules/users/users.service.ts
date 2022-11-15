@@ -43,6 +43,7 @@ export class UsersService {
       const user = await this.usersRepository.findOne({
         where: { username },
         select: {
+          id: true,
           username: true,
           password: withPassword,
         },
