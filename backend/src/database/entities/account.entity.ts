@@ -12,7 +12,7 @@ export class Account {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   balance: string;
 
   @CreateDateColumn()

@@ -21,11 +21,11 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   @Index()
   username: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @OneToOne(() => Account)
@@ -42,7 +42,12 @@ export class User {
   deletedAt: Date;
 
   @BeforeInsert()
-  public async setPassword(password: string): Promise<void> {
+  private async setLowercaseUsername(): Promise<void> {
+    this.username = this.username.toLowerCase();
+  }
+
+  @BeforeInsert()
+  private async setPassword(password: string): Promise<void> {
     try {
       if (this.password || password) {
         this.password = await bcrypt.hash(password || this.password, 10);
