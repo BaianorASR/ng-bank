@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 
 export class UserCreateDto {
   @Transform(({ value }) => value.trim().toLowerCase())
@@ -10,6 +10,6 @@ export class UserCreateDto {
 
   @IsNotEmpty()
   @IsString()
-  @Length(3, 30)
+  @Length(8, 30)
   password: string;
 }

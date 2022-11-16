@@ -3,8 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -16,12 +15,10 @@ export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Account)
-  @JoinColumn()
+  @ManyToOne(() => Account, (account) => account.debitedTransactions)
   debitedAccount: Account;
 
-  @OneToOne(() => Account)
-  @JoinColumn()
+  @ManyToOne(() => Account, (account) => account.creditedTransactions)
   creditedAccount: Account;
 
   @Column({ type: 'decimal', scale: 2, precision: 10 })

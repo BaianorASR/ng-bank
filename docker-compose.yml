@@ -3,15 +3,13 @@ services:
   db:
     container_name: db
     image: postgres:14.4-alpine
-    ports:
-      - "5432:5432"
     restart: always
     volumes:
       - ./:/betblex
-    environment:
-      POSTGRES_PASSWORD: baianor
-      POSTGRES_USER: baianor
-      POSTGRES_DB: ngbank
+    env_file:
+      - .database.env
+    ports:
+      - "5432:5432"
     command: -p 5432
 
   backend:
