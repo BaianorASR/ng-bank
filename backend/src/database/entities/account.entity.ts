@@ -15,7 +15,7 @@ export class Account {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: '0,00' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: '0' })
   balance: string;
 
   @OneToMany(() => Transaction, (transaction) => transaction.debitedAccount)
