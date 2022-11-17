@@ -8,11 +8,11 @@ export class UserCreateDto {
   @Transform(({ value }) => value.trim().toLowerCase())
   username: string;
 
-  @Matches(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*d)[a-zA-Zd]{8,}$'), {
-    message: `Password must contain at least one uppercase letter, one lowercase letter, one number and must be at least 8 characters long`,
+  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, {
+    message:
+      'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter and one number.',
   })
-  @IsNotEmpty()
   @IsString()
-  @Length(8, 30)
+  @IsNotEmpty()
   password: string;
 }

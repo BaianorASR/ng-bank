@@ -1,6 +1,6 @@
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
-import { User } from '@database/entities';
+import { Account, User } from '@database/entities';
 import {
   ConflictException,
   Injectable,
@@ -9,16 +9,20 @@ import {
 } from '@nestjs/common';
 
 import { UserCreateDto } from './dtos';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Account)
+    private readonly accountsRepository: Repository<Account>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
-  async createNewUser(userCreateDto: UserCreateDto): Promise<User> {
+  async createNewUser(userCreateDto: UserCreateDto): Promise<any> {
     try {
       const userAlreadyExists = await this.findUserByUsername(
         userCreateDto.username,
@@ -26,9 +30,22 @@ export class UsersService {
 
       if (userAlreadyExists) throw new ConflictException('User already exists');
 
-      const newUser = this.usersRepository.create(userCreateDto);
-      const createdUser = this.usersRepository.save(newUser);
-      return createdUser;
+      const newUser = await this.dataSource.transaction(
+        async (manager): Promise<User> => {
+          const user = await manager.save(User, {
+            username: userCreateDto.username,
+            password: userCreateDto.password,
+          });
+
+          await manager.save(Account, {
+            user: user,
+            balance: '0',
+          });
+          return user;
+        },
+      );
+
+      return newUser;
     } catch (error) {
       if (error instanceof ConflictException) throw error;
       throw new InternalServerErrorException(error.message);
@@ -55,7 +72,7 @@ export class UsersService {
     }
   }
 
-  async findOne(id: number): Promise<User> {
+  async findUserById(id: number): Promise<User> {
     try {
       const user = await this.usersRepository.findOneByOrFail({ id });
       return user;

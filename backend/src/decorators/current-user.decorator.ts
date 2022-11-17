@@ -11,7 +11,6 @@ export const getCurrentUserByContext = (
     return context.switchToRpc().getData().user;
   }
 };
-
 export const CurrentUser = createParamDecorator(
   (_data: unknown, context: ExecutionContext): ICurrentUser =>
     getCurrentUserByContext(context),

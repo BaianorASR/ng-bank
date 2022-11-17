@@ -28,7 +28,11 @@ export class User {
   @Column({ select: false })
   password: string;
 
-  @OneToOne(() => Account)
+  @OneToOne(() => Account, (account) => account.user, {
+    cascade: true,
+    eager: true,
+    createForeignKeyConstraints: true,
+  })
   @JoinColumn()
   account: Account;
 

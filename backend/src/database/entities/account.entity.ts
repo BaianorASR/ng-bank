@@ -3,12 +3,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { Transaction } from './transaction.entity';
+import { User } from './user.entity';
 
 @Entity('accounts')
 export class Account {
@@ -17,6 +20,9 @@ export class Account {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: '0' })
   balance: string;
+
+  @OneToOne(() => User, (user) => user.account)
+  user: User;
 
   @OneToMany(() => Transaction, (transaction) => transaction.debitedAccount)
   debitedTransactions: Transaction[];
