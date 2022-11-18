@@ -30,19 +30,20 @@ export class User {
 
   @OneToOne(() => Account, (account) => account.user, {
     cascade: true,
+    onDelete: 'CASCADE',
     eager: true,
     createForeignKeyConstraints: true,
   })
   @JoinColumn()
   account: Account;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deletedAt: Date;
 
   @BeforeInsert()
@@ -51,11 +52,9 @@ export class User {
   }
 
   @BeforeInsert()
-  private async setPassword(password: string): Promise<void> {
+  private async hashPassword(): Promise<void> {
     try {
-      if (this.password || password) {
-        this.password = await bcrypt.hash(password || this.password, 10);
-      }
+      this.password = await bcrypt.hash(this.password, 10);
     } catch (e) {
       throw new InternalServerErrorException(
         'There are some issues in the hash',

@@ -22,13 +22,15 @@ export class AuthService {
   }
 
   async validateUser(username: string, password: string): Promise<User> {
-    const user = await this.usersService.findUserByUsername(username, true);
-    if (user && bcrypt.compareSync(password, user.password)) {
-      delete user.password;
-      return user;
+    try {
+      const user = await this.usersService.findUserByUsername(username, true);
+      if (bcrypt.compareSync(password, user.password)) {
+        delete user.password;
+        return user;
+      }
+    } catch (error) {
+      return null;
     }
-
-    return null;
   }
 
   async login(currentUser: ICurrentUser): Promise<IAccessToken> {

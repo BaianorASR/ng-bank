@@ -3,6 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Account, User } from '@database/entities';
 import {
   ConflictException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,37 +11,42 @@ import {
 
 import { UserCreateDto } from './dtos';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
+import { EMPTY, from, firstValueFrom, catchError, map, take, of } from 'rxjs';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    @InjectRepository(Account)
-    private readonly accountsRepository: Repository<Account>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
 
   async createNewUser(userCreateDto: UserCreateDto): Promise<any> {
     try {
-      const userAlreadyExists = await this.findUserByUsername(
-        userCreateDto.username,
+      const alreadyExist = await firstValueFrom(
+        from(this.findUserByUsername(userCreateDto.username)).pipe(
+          catchError(() => of(void 0)),
+        ),
       );
 
-      if (userAlreadyExists) throw new ConflictException('User already exists');
+      if (alreadyExist)
+        throw new ConflictException(
+          `User ${userCreateDto.username} already exist`,
+        );
 
       const newUser = await this.dataSource.transaction(
         async (manager): Promise<User> => {
-          const user = await manager.save(User, {
+          const UserToCreate = manager.create(User, {
             username: userCreateDto.username,
             password: userCreateDto.password,
           });
 
-          await manager.save(Account, {
-            user: user,
-            balance: '0',
-          });
+          const user = await manager.save(User, UserToCreate);
+
+          const account = manager.create(Account, { user });
+
+          await manager.save(Account, account);
           return user;
         },
       );
@@ -66,9 +72,11 @@ export class UsersService {
         },
       });
 
+      if (!user) throw new Error();
+
       return user;
     } catch (error) {
-      throw new NotFoundException(`User with username ${username} not found`);
+      throw new NotFoundException(`User ${username} not found`);
     }
   }
 
