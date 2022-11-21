@@ -5,13 +5,13 @@ import {
   IsString,
 } from 'class-validator';
 
-export class SendToDto {
+export class SendCashInToDto {
   @IsString()
   @IsNotEmpty()
   username: string;
 
-  @IsDecimal()
+  @IsDecimal({ decimal_digits: '2' })
   @IsNumberString()
   @IsNotEmpty()
-  value: string;
+  amount: string;
 }

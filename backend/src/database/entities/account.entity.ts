@@ -3,12 +3,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { PreconditionFailedException } from '@nestjs/common';
 
 import { Transaction } from './transaction.entity';
 import { User } from './user.entity';
@@ -18,7 +19,7 @@ export class Account {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: '0' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: '100.00' })
   balance: string;
 
   @OneToOne(() => User, (user) => user.account)
@@ -38,4 +39,9 @@ export class Account {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  hasEnoughBalance(amount: number): void {
+    if (parseFloat(this.balance) < amount)
+      throw new PreconditionFailedException('Insufficient balance');
+  }
 }

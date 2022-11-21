@@ -3,15 +3,13 @@ import { DataSource, Repository } from 'typeorm';
 import { Account, User } from '@database/entities';
 import {
   ConflictException,
-  HttpException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 
 import { UserCreateDto } from './dtos';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
-import { EMPTY, from, firstValueFrom, catchError, map, take, of } from 'rxjs';
+import { from, firstValueFrom, catchError, of } from 'rxjs';
 
 @Injectable()
 export class UsersService {
@@ -53,8 +51,7 @@ export class UsersService {
 
       return newUser;
     } catch (error) {
-      if (error instanceof ConflictException) throw error;
-      throw new InternalServerErrorException(error.message);
+      throw error;
     }
   }
 
